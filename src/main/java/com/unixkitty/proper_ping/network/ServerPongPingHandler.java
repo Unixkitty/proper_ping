@@ -1,8 +1,8 @@
-package com.unixkitty.proper_ping;
+package com.unixkitty.proper_ping.network;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.unixkitty.proper_ping.network.ModNetworkDispatcher;
+import com.unixkitty.proper_ping.Config;
 import com.unixkitty.proper_ping.network.packet.PongS2CPacket;
 import it.unimi.dsi.fastutil.longs.LongIntMutablePair;
 import net.minecraft.Util;
@@ -14,7 +14,6 @@ import java.util.UUID;
 
 public class ServerPongPingHandler
 {
-    //    private static final Object2ObjectOpenHashMap<UUID, LongIntImmutablePair> pongResponseTimersMap = new Object2ObjectOpenHashMap<>();
     private static final Cache<UUID, LongIntMutablePair> cache = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofSeconds(35)).build();
 
     public static void handle(NetworkEvent.Context context, long time, int lastClientLatency)
@@ -49,21 +48,6 @@ public class ServerPongPingHandler
                 //Guava Cache should be thread safe
                 cache.put(player.getUUID(), lastResponseTimePair);
             }
-
-            /*final long lastResponseTime = pongResponseTimersMap.getOrDefault(player, -1L);
-            long currentTime = Util.getMillis();
-
-            if (lastResponseTime == -1L || currentTime - lastResponseTime >= 1000L)
-            {
-                //Actually update the map only on one thread to avoid race conditions
-                context.enqueueWork(() ->
-                {
-                    pongResponseTimersMap.put(player.getUUID(), currentTime);
-                    player.latency =
-                });
-
-                ModNetworkDispatcher.sendToClient(new PongS2CPacket(time), player);
-            }*/
         }
     }
 
@@ -79,5 +63,10 @@ public class ServerPongPingHandler
         {
             player.latency = wouldBeValue;
         }
+    }
+
+    public static int getLatencyUpdateInterval()
+    {
+        return Config.multiplayerLatencyBroadcastInterval.get();
     }
 }

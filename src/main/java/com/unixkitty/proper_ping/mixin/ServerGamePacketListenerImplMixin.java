@@ -1,6 +1,6 @@
 package com.unixkitty.proper_ping.mixin;
 
-import com.unixkitty.proper_ping.ServerPongPingHandler;
+import com.unixkitty.proper_ping.network.ServerPongPingHandler;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.objectweb.asm.Opcodes;

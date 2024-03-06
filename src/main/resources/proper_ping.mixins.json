@@ -4,9 +4,11 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "proper_ping.refmap.json",
   "mixins": [
+    "PlayerListMixin",
     "ServerGamePacketListenerImplMixin"
   ],
   "client": [
+    "PlayerTabOverlayMixin"
   ],
   "minVersion": "0.8"
 }

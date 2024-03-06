@@ -8,7 +8,6 @@ import com.unixkitty.proper_ping.network.packet.PongS2CPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -26,11 +25,13 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
 
     private static final int WHITE = 0xFFFFFF;
 
+    private final int pingExtraColumnWidth;
     private final Minecraft minecraft;
 
     private PingOverlay()
     {
         this.minecraft = Minecraft.getInstance();
+        this.pingExtraColumnWidth = this.minecraft.font.width(Component.translatable("multiplayer.status.ping", 999));
     }
 
     @Override
@@ -45,70 +46,86 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
                         && !minecraft.options.renderDebug
         )
         {
-            //TODO remove vanilla value from here
-            PlayerInfo info = minecraft.player.connection.getPlayerInfo(minecraft.player.getUUID());
+            MutableComponent rttAverageComponent = Component.translatable("multiplayer.status.ping", ClientPingPongHandler.rttLatency);
 
-            if (info != null)
+            poseStack.pushPose();
+
+            MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+
+            minecraft.font.drawInBatch(
+                    rttAverageComponent,
+                    Config.pingHudX.get(), Config.pingHudY.get(),
+                    getPingColour(ClientPingPongHandler.rttLatency),
+                    Config.drawTextWithShadow.get(),
+                    poseStack.last().pose(), buffer, false, 0, 15728880);
+
+            if (Config.showPingQueue.get())
             {
-                MutableComponent vanillaLatencyComponent = Component.translatable("multiplayer.status.ping", info.getLatency());
-                MutableComponent rttAverageComponent = Component.translatable("multiplayer.status.ping", ClientPingPongHandler.rttLatency);
-                int colour;
-
-                if (ClientPingPongHandler.rttLatency < 0)
-                {
-                    colour = WHITE;
-                }
-                else if (ClientPingPongHandler.rttLatency < 150)
-                {
-                    colour = ChatFormatting.GREEN.getColor();
-                }
-                else if (ClientPingPongHandler.rttLatency < 300)
-                {
-                    colour = ChatFormatting.YELLOW.getColor();
-                }
-                else if (ClientPingPongHandler.rttLatency < 600)
-                {
-                    colour = ChatFormatting.GOLD.getColor();
-                }
-                else if (ClientPingPongHandler.rttLatency < 1000)
-                {
-                    colour = ChatFormatting.RED.getColor();
-                }
-                else
-                {
-                    colour = ChatFormatting.DARK_RED.getColor();
-                }
-
-                poseStack.pushPose();
-
-                //Custom rtt
-                MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-
                 minecraft.font.drawInBatch(
-                        rttAverageComponent,
-                        Config.pingHudX.get(), Config.pingHudY.get(),
-                        colour,
+                        " [" + PongS2CPacket.RTT_QUEUE.stream().map(String::valueOf).collect(Collectors.joining(",")) + "]",
+                        Config.pingHudX.get() + minecraft.font.width(rttAverageComponent), Config.pingHudY.get(),
+                        WHITE,
                         Config.drawTextWithShadow.get(),
                         poseStack.last().pose(), buffer, false, 0, 15728880);
-
-                if (Config.showPingQueue.get())
-                {
-                    minecraft.font.drawInBatch(
-                            " [" + PongS2CPacket.RTT_QUEUE.stream().map(String::valueOf).collect(Collectors.joining(",")) + "]",
-                            Config.pingHudX.get() + minecraft.font.width(rttAverageComponent), Config.pingHudY.get(),
-                            WHITE,
-                            Config.drawTextWithShadow.get(),
-                            poseStack.last().pose(), buffer, false, 0, 15728880);
-                }
-
-                buffer.endBatch();
-
-                //Vanilla latency value
-                minecraft.font.drawShadow(poseStack, vanillaLatencyComponent, Config.pingHudX.get(), Config.pingHudY.get() + minecraft.font.lineHeight, WHITE);
-                minecraft.font.drawShadow(poseStack, "tickCount: " + gui.getGuiTicks(), Config.pingHudX.get(), Config.pingHudY.get() + minecraft.font.lineHeight * 2, WHITE);
-
-                poseStack.popPose();
             }
+
+            buffer.endBatch();
+
+            poseStack.popPose();
+        }
+    }
+
+    public boolean renderTabListPing(PoseStack poseStack, int columnWidth, int x, int y, int latency)
+    {
+        if (Config.playerListNumbers.get())
+        {
+            Component component = Component.translatable("multiplayer.status.ping", latency);
+
+            minecraft.font.drawShadow(poseStack, component, x + columnWidth - minecraft.font.width(component), y, getPingColour(latency));
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public int getTabListColumnWidth(int vanillaWidth)
+    {
+        return Config.playerListNumbers.get() ? vanillaWidth + this.pingExtraColumnWidth : vanillaWidth;
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    private int getPingColour(int latency)
+    {
+        if (latency < 0)
+        {
+            return WHITE;
+        }
+        else if (latency < 90)
+        {
+            return ChatFormatting.DARK_GREEN.getColor();
+        }
+        else if (latency < 150)
+        {
+            return ChatFormatting.GREEN.getColor();
+        }
+        else if (latency < 300)
+        {
+            return ChatFormatting.YELLOW.getColor();
+        }
+        else if (latency < 600)
+        {
+            return ChatFormatting.GOLD.getColor();
+        }
+        else if (latency < 1000)
+        {
+            return ChatFormatting.RED.getColor();
+        }
+        else
+        {
+            return ChatFormatting.DARK_RED.getColor();
         }
     }
 }

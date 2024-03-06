@@ -20,6 +20,7 @@ public class ProperPing
 
     public ProperPing()
     {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);

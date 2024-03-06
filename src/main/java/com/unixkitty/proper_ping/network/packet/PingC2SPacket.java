@@ -1,6 +1,6 @@
 package com.unixkitty.proper_ping.network.packet;
 
-import com.unixkitty.proper_ping.ServerPongPingHandler;
+import com.unixkitty.proper_ping.network.ServerPongPingHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 

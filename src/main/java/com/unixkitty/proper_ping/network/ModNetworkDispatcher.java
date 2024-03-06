@@ -47,7 +47,6 @@ public class ModNetworkDispatcher
                 })
                 .encoder(BasePacket::toBytes)
                 .consumerNetworkThread(BasePacket::handle)
-//                .consumerMainThread(BasePacket::handle)
                 .add();
     }
 
