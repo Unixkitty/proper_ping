@@ -15,10 +15,12 @@ public class Config
     public static ForgeConfigSpec SERVER_CONFIG;
 
     public static ForgeConfigSpec.BooleanValue pingHudEnabled;
-    public static ForgeConfigSpec.BooleanValue drawTextWithShadow;
     public static ForgeConfigSpec.BooleanValue showPingQueue;
-    public static ForgeConfigSpec.IntValue pingHudX;
-    public static ForgeConfigSpec.IntValue pingHudY;
+    public static ForgeConfigSpec.BooleanValue drawTextWithShadow;
+    public static ForgeConfigSpec.BooleanValue leftOrRight;
+    public static ForgeConfigSpec.IntValue horizontalPadding;
+    public static ForgeConfigSpec.IntValue lineFromTop;
+    public static ForgeConfigSpec.IntValue verticalPadding;
 
     public static ForgeConfigSpec.BooleanValue playerListNumbers;
 
@@ -31,10 +33,12 @@ public class Config
         {
             clientConfig.push("Ping HUD");
             pingHudEnabled = clientConfig.comment("Enable ping HUD").define("pingHudEnabled", true);
-            drawTextWithShadow = clientConfig.comment("Draw text with a shadow").define("drawTextWithShadow", true);
             showPingQueue = clientConfig.comment("Additionally show 5 last ping values").define("showPingQueue", false);
-            pingHudX = clientConfig.defineInRange("pingHudX", 6, 0, Integer.MAX_VALUE);
-            pingHudY = clientConfig.defineInRange("pingHudY", 18, 0, Integer.MAX_VALUE);
+            drawTextWithShadow = clientConfig.comment("Draw text with a shadow").define("drawTextWithShadow", true);
+            leftOrRight = clientConfig.comment("Draw ping either on the left side (true), or on the right (false)").define("leftOrRight", true);
+            horizontalPadding = clientConfig.comment("How many scaled GUI pixels to start drawing from the edge of the screen").defineInRange("horizontalPadding", 4, 0, Integer.MAX_VALUE);
+            lineFromTop = clientConfig.comment("On which line counting from the top to start drawing from").defineInRange("lineFromTop", 1, 0, Integer.MAX_VALUE);
+            verticalPadding = clientConfig.comment("How many scaled GUI pixels to start drawing from the top of the screen").defineInRange("verticalPadding", 4, 0, Integer.MAX_VALUE);
             clientConfig.pop();
         }
 

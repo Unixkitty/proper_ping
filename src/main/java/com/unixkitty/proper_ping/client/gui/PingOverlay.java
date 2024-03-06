@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
@@ -46,28 +45,41 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
                         && !minecraft.options.renderDebug
         )
         {
-            MutableComponent rttAverageComponent = Component.translatable("multiplayer.status.ping", ClientPingPongHandler.rttLatency);
+            String text = Component.translatable("multiplayer.status.ping", ClientPingPongHandler.rttLatency).getString();
+            String extraText;
+            int length;
 
             poseStack.pushPose();
 
             MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 
-            minecraft.font.drawInBatch(
-                    rttAverageComponent,
-                    Config.pingHudX.get(), Config.pingHudY.get(),
-                    getPingColour(ClientPingPongHandler.rttLatency),
-                    Config.drawTextWithShadow.get(),
-                    poseStack.last().pose(), buffer, false, 0, 15728880);
+            int y = Config.verticalPadding.get() + (minecraft.font.lineHeight * Config.lineFromTop.get());
 
             if (Config.showPingQueue.get())
             {
+                extraText = " [" + PongS2CPacket.RTT_QUEUE.stream().map(String::valueOf).collect(Collectors.joining(",")) + "]";
+                length = minecraft.font.width(text + extraText);
+
                 minecraft.font.drawInBatch(
-                        " [" + PongS2CPacket.RTT_QUEUE.stream().map(String::valueOf).collect(Collectors.joining(",")) + "]",
-                        Config.pingHudX.get() + minecraft.font.width(rttAverageComponent), Config.pingHudY.get(),
+                        extraText,
+                        Config.leftOrRight.get() ? Config.horizontalPadding.get() + minecraft.font.width(text) : minecraft.getWindow().getGuiScaledWidth() - Config.horizontalPadding.get() - minecraft.font.width(extraText),
+                        y,
                         WHITE,
                         Config.drawTextWithShadow.get(),
                         poseStack.last().pose(), buffer, false, 0, 15728880);
             }
+            else
+            {
+                length = minecraft.font.width(text);
+            }
+
+            minecraft.font.drawInBatch(
+                    text,
+                    Config.leftOrRight.get() ? Config.horizontalPadding.get() : minecraft.getWindow().getGuiScaledWidth() - Config.horizontalPadding.get() - length,
+                    Config.verticalPadding.get() + (minecraft.font.lineHeight * Config.lineFromTop.get()),
+                    getPingColour(ClientPingPongHandler.rttLatency),
+                    Config.drawTextWithShadow.get(),
+                    poseStack.last().pose(), buffer, false, 0, 15728880);
 
             buffer.endBatch();
 
