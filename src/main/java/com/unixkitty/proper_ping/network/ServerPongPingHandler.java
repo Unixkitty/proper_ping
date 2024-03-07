@@ -32,15 +32,11 @@ public class ServerPongPingHandler
             final long lastResponseTime = lastResponseTimePair.leftLong();
             long currentTime = Util.getMillis();
 
-            if (lastResponseTime == -1 || currentTime - lastResponseTime >= 1000)
+            if (currentTime - lastResponseTime >= 1000 || lastResponseTime == -1)
             {
                 ModNetworkDispatcher.sendToClient(new PongS2CPacket(time), player);
 
-                context.enqueueWork(() ->
-                {
-                    player.latency = lastClientLatency;
-                    cache.cleanUp();
-                });
+                context.enqueueWork(() -> player.latency = lastClientLatency);
 
                 lastResponseTimePair.left(currentTime);
                 lastResponseTimePair.right(lastClientLatency);
