@@ -161,6 +161,7 @@ dependencies {
 
     runtimeOnly fg.deobf("curse.maven:embeddium-908741:5130559")
     runtimeOnly fg.deobf("curse.maven:magnesium-extras-558905:4632201")
+    runtimeOnly fg.deobf("curse.maven:configured-457570:4462837")
 }
 
 mixin {
