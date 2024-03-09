@@ -1,15 +1,12 @@
 package com.unixkitty.proper_ping.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
 import com.unixkitty.proper_ping.Config;
 import com.unixkitty.proper_ping.network.packet.PingS2CPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -19,7 +16,7 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import java.util.Arrays;
 
 @OnlyIn(Dist.CLIENT)
-public class PingOverlay extends GuiComponent implements IGuiOverlay
+public class PingOverlay implements IGuiOverlay
 {
     public static final PingOverlay INSTANCE = new PingOverlay();
 
@@ -39,7 +36,7 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
     }
 
     @Override
-    public void render(ForgeGui gui, PoseStack poseStack, float partialTick, int screenWidth, int screenHeight)
+    public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight)
     {
         if (
                 minecraft.player == null
@@ -53,9 +50,9 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
             return;
         }
 
-        poseStack.pushPose();
+        PoseStack poseStack = guiGraphics.pose();
 
-        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        poseStack.pushPose();
 
         final boolean leftOrRight = Config.leftOrRight.get();
         final int horizontalPadding = Config.horizontalPadding.get();
@@ -65,41 +62,39 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
 
         int y = verticalPadding + (minecraft.font.lineHeight * lineFromTop);
 
-        Matrix4f matrix4f = poseStack.last().pose();
-
         int length;
 
         if (Config.showPingQueue.get())
         {
             length = minecraft.font.width(this.latencyText + this.queueText);
 
-            minecraft.font.drawInBatch(
+            guiGraphics.drawString(
+                    minecraft.font,
                     this.queueText,
                     leftOrRight ? horizontalPadding + minecraft.font.width(this.latencyText) : screenWidth - horizontalPadding - minecraft.font.width(this.queueText),
                     y,
                     WHITE,
-                    drawTextWithShadow,
-                    matrix4f, buffer, false, 0, 15728880);
+                    drawTextWithShadow
+            );
         }
         else
         {
             length = minecraft.font.width(this.latencyText);
         }
 
-        minecraft.font.drawInBatch(
+        guiGraphics.drawString(
+                minecraft.font,
                 this.latencyText,
                 leftOrRight ? horizontalPadding : screenWidth - horizontalPadding - length,
                 verticalPadding + (minecraft.font.lineHeight * lineFromTop),
                 getPingColour(averageLatency),
-                drawTextWithShadow,
-                matrix4f, buffer, false, 0, 15728880);
-
-        buffer.endBatch();
+                drawTextWithShadow
+        );
 
         poseStack.popPose();
     }
 
-    public boolean renderTabListPing(PoseStack poseStack, int columnWidth, int x, int y, final PlayerInfo playerInfo)
+    public boolean renderTabListPing(GuiGraphics guiGraphics, int columnWidth, int x, int y, final PlayerInfo playerInfo)
     {
         if (minecraft.player == null || !Config.playerListNumbers.get()) return false;
 
@@ -107,7 +102,7 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
 
         Component component = Component.translatable("multiplayer.status.ping", latency);
 
-        minecraft.font.drawShadow(poseStack, component, x + columnWidth - minecraft.font.width(component), y, getPingColour(latency));
+        guiGraphics.drawString(minecraft.font, component, x + columnWidth - minecraft.font.width(component), y, getPingColour(latency));
 
         return true;
     }

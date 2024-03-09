@@ -3,7 +3,6 @@ package com.unixkitty.proper_ping.network;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.unixkitty.proper_ping.Config;
-import com.unixkitty.proper_ping.ProperPing;
 import com.unixkitty.proper_ping.network.packet.PingS2CPacket;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.Util;
@@ -12,7 +11,6 @@ import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.UUID;
 
 public class ServerPingPongHandler
@@ -34,11 +32,7 @@ public class ServerPingPongHandler
             playerPingInfo.pingTime = currentTime;
             playerPingInfo.pingTimeChallenge = currentTime;
 
-            int[] temp = playerPingInfo.RTT_QUEUE.list.elements();
-
-            ModNetworkDispatcher.sendToClient(new PingS2CPacket(currentTime, playerPingInfo.averageLatency, temp), player);
-
-            ProperPing.LOG.debug("Pinging {}, extra: {}", player.getDisplayName().getString(), Arrays.toString(temp));
+            ModNetworkDispatcher.sendToClient(new PingS2CPacket(currentTime, playerPingInfo.averageLatency, playerPingInfo.RTT_QUEUE.list.elements()), player);
 
             cache.put(playerUUID, playerPingInfo);
         }
@@ -61,8 +55,6 @@ public class ServerPingPongHandler
 
                 player.latency = playerPingInfo.updateAverage();
             });
-
-            ProperPing.LOG.debug("Handled pong for {}", player.getDisplayName().getString());
         }
     }
 

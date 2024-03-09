@@ -6,8 +6,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
-import java.util.Objects;
-
 @Mod.EventBusSubscriber(modid = ProperPing.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Config
 {
@@ -63,13 +61,16 @@ public class Config
 
     private static void reload(ModConfig config, ModConfig.Type type)
     {
-        if (Objects.requireNonNull(type) == ModConfig.Type.CLIENT)
+        if (config.getModId().equals(ProperPing.MODID))
         {
-            CLIENT_CONFIG.setConfig(config.getConfigData());
-        }
-        else if (Objects.requireNonNull(type) == ModConfig.Type.SERVER)
-        {
-            SERVER_CONFIG.setConfig(config.getConfigData());
+            if (type == ModConfig.Type.SERVER)
+            {
+                SERVER_CONFIG.setConfig(config.getConfigData());
+            }
+            else if (type == ModConfig.Type.CLIENT)
+            {
+                CLIENT_CONFIG.setConfig(config.getConfigData());
+            }
         }
     }
 
