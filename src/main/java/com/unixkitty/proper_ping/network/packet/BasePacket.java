@@ -9,5 +9,5 @@ public abstract class BasePacket
 {
     public abstract void toBytes(FriendlyByteBuf buffer);
 
-    public abstract boolean handle(Supplier<NetworkEvent.Context> contextSupplier);
+    public abstract void handle(Supplier<NetworkEvent.Context> contextSupplier);
 }

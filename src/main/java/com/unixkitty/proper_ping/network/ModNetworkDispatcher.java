@@ -2,8 +2,9 @@ package com.unixkitty.proper_ping.network;
 
 import com.unixkitty.proper_ping.ProperPing;
 import com.unixkitty.proper_ping.network.packet.BasePacket;
-import com.unixkitty.proper_ping.network.packet.PingC2SPacket;
-import com.unixkitty.proper_ping.network.packet.PongS2CPacket;
+import com.unixkitty.proper_ping.network.packet.PingS2CPacket;
+import com.unixkitty.proper_ping.network.packet.PongC2SPacket;
+import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -25,9 +26,8 @@ public class ModNetworkDispatcher
 
         //================================================================================================
 
-        registerPacket(PingC2SPacket.class, true);
-        registerPacket(PongS2CPacket.class, false);
-
+        registerPacket(PingS2CPacket.class, false);
+        registerPacket(PongC2SPacket.class, true);
     }
 
     private static <T extends BasePacket> void registerPacket(Class<T> packetClass, boolean toServer)
@@ -41,8 +41,9 @@ public class ModNetworkDispatcher
                     }
                     catch (Exception e)
                     {
-                        ProperPing.LOG.error(e);
-                        throw new RuntimeException("Failed to decode packet " + packetClass.getSimpleName(), e);
+                        ProperPing.LOG.error("Failed to decode packet " + packetClass.getSimpleName(), e);
+
+                        throw new RuntimeException(e);
                     }
                 })
                 .encoder(BasePacket::toBytes)
@@ -55,9 +56,9 @@ public class ModNetworkDispatcher
         return PROTOCOL_VERSION.equals(protocolVersion);
     }
 
-    public static void sendToServer(BasePacket message)
+    public static void sendToServer(BasePacket message, Connection connection)
     {
-        INSTANCE.sendToServer(message);
+        INSTANCE.sendTo(message, connection, NetworkDirection.PLAY_TO_SERVER);
     }
 
     public static void sendToClient(BasePacket message, ServerPlayer player)

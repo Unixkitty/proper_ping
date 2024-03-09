@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.unixkitty.proper_ping.Config;
-import com.unixkitty.proper_ping.client.ClientPingPongHandler;
+import com.unixkitty.proper_ping.network.packet.PingS2CPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -15,6 +15,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
+import java.util.Arrays;
+
 @OnlyIn(Dist.CLIENT)
 public class PingOverlay extends GuiComponent implements IGuiOverlay
 {
@@ -24,6 +26,10 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
 
     private final int pingExtraColumnWidth;
     private final Minecraft minecraft;
+
+    private int averageLatency = 0;
+    private String latencyText = "";
+    private String queueText = "";
 
     private PingOverlay()
     {
@@ -46,10 +52,6 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
             return;
         }
 
-        String text = Component.translatable("multiplayer.status.ping", ClientPingPongHandler.rttLatency).getString();
-        String extraText;
-        int length;
-
         poseStack.pushPose();
 
         MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
@@ -64,14 +66,15 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
 
         Matrix4f matrix4f = poseStack.last().pose();
 
+        int length;
+
         if (Config.showPingQueue.get())
         {
-            extraText = ClientPingPongHandler.queueText;
-            length = minecraft.font.width(text + extraText);
+            length = minecraft.font.width(this.latencyText + this.queueText);
 
             minecraft.font.drawInBatch(
-                    extraText,
-                    leftOrRight ? horizontalPadding + minecraft.font.width(text) : screenWidth - horizontalPadding - minecraft.font.width(extraText),
+                    this.queueText,
+                    leftOrRight ? horizontalPadding + minecraft.font.width(this.latencyText) : screenWidth - horizontalPadding - minecraft.font.width(this.queueText),
                     y,
                     WHITE,
                     drawTextWithShadow,
@@ -79,14 +82,14 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
         }
         else
         {
-            length = minecraft.font.width(text);
+            length = minecraft.font.width(this.latencyText);
         }
 
         minecraft.font.drawInBatch(
-                text,
+                this.latencyText,
                 leftOrRight ? horizontalPadding : screenWidth - horizontalPadding - length,
                 verticalPadding + (minecraft.font.lineHeight * lineFromTop),
-                getPingColour(ClientPingPongHandler.rttLatency),
+                getPingColour(averageLatency),
                 drawTextWithShadow,
                 matrix4f, buffer, false, 0, 15728880);
 
@@ -147,5 +150,12 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
         {
             return ChatFormatting.DARK_RED.getColor();
         }
+    }
+
+    public static void updateLatencyInfo(final PingS2CPacket packet)
+    {
+        INSTANCE.averageLatency = packet.averageLatency;
+        INSTANCE.latencyText = Component.translatable("multiplayer.status.ping", INSTANCE.averageLatency).getString();
+        INSTANCE.queueText = " " + Arrays.toString(packet.rttQueue);
     }
 }
