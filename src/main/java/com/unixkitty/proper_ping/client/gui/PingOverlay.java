@@ -8,6 +8,7 @@ import com.unixkitty.proper_ping.network.packet.PingS2CPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -98,20 +99,17 @@ public class PingOverlay extends GuiComponent implements IGuiOverlay
         poseStack.popPose();
     }
 
-    public boolean renderTabListPing(PoseStack poseStack, int columnWidth, int x, int y, int latency)
+    public boolean renderTabListPing(PoseStack poseStack, int columnWidth, int x, int y, final PlayerInfo playerInfo)
     {
-        if (Config.playerListNumbers.get())
-        {
-            Component component = Component.translatable("multiplayer.status.ping", latency);
+        if (minecraft.player == null || !Config.playerListNumbers.get()) return false;
 
-            minecraft.font.drawShadow(poseStack, component, x + columnWidth - minecraft.font.width(component), y, getPingColour(latency));
+        int latency = minecraft.player.getGameProfile().getName().equalsIgnoreCase(playerInfo.getProfile().getName()) ? this.averageLatency : playerInfo.getLatency();
 
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        Component component = Component.translatable("multiplayer.status.ping", latency);
+
+        minecraft.font.drawShadow(poseStack, component, x + columnWidth - minecraft.font.width(component), y, getPingColour(latency));
+
+        return true;
     }
 
     public int getTabListColumnWidth(int vanillaWidth)

@@ -22,7 +22,7 @@ public class PlayerTabOverlayMixin
     @Inject(at = @At("HEAD"), method = "renderPingIcon(Lcom/mojang/blaze3d/vertex/PoseStack;IIILnet/minecraft/client/multiplayer/PlayerInfo;)V", cancellable = true)
     public void onRenderPingIcon(PoseStack poseStack, int columnWidth, int x, int y, PlayerInfo playerInfo, CallbackInfo ci)
     {
-        if (PingOverlay.INSTANCE.renderTabListPing(poseStack, columnWidth, x, y, playerInfo.getLatency()))
+        if (PingOverlay.INSTANCE.renderTabListPing(poseStack, columnWidth, x, y, playerInfo))
         {
             ci.cancel();
         }
