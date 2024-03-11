@@ -1,7 +1,6 @@
-Available for: 1.19.2
+![](http://cf.way2muchnoise.eu/versions/984800.svg)
 
-_Fabric and newer Minecraft versions coming soon._
-
+[![](http://cf.way2muchnoise.eu/title/984800.svg)](https://www.curseforge.com/minecraft/mc-mods/proper-ping)
 [![](https://static.unixkitty.com/icons/modrinth_long_color_24.svg)](https://modrinth.com/mod/proper-ping)
 [![](https://static.unixkitty.com/icons/discord_long_color_24.svg)](https://discord.unixkitty.com)
 
